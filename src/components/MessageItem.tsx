@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ComponentPropsWithoutRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -10,6 +10,12 @@ interface MessageItemProps {
   message: Message;
 }
 
+interface CodeProps extends ComponentPropsWithoutRef<'code'> {
+  inline?: boolean;
+  children?: React.ReactNode;
+}
+
+const Highlighter = SyntaxHighlighter as unknown as React.FC<any>;
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   return (
     <div className={`message-item ${message.role}`}>
@@ -25,17 +31,17 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
-            code({ node, inline, className, children, ...props }) {
+            code({ inline, className, children, ...props }: CodeProps) {
               const match = /language-(\w+)/.exec(className || '');
               return !inline && match ? (
-                <SyntaxHighlighter
-                  style={tomorrow}
+                <Highlighter
+                  style={tomorrow as any}
                   language={match[1]}
                   PreTag="div"
                   {...props}
                 >
                   {String(children).replace(/\n$/, '')}
-                </SyntaxHighlighter>
+                </Highlighter>
               ) : (
                 <code className={className} {...props}>
                   {children}
